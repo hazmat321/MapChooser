@@ -1,4 +1,5 @@
 ﻿build
 examples
 obj
+MapChooser.sln
 Deploy.ps1
