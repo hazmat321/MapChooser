@@ -276,39 +276,6 @@ public sealed class MapChooser : BasePlugin {
             }
         }
 
-        // New Logic: Check score proximity to winning (Match Point)
-        if (!trigger)
-        {
-            int winningScore = 0;
-            if (winlimit > 0)
-            {
-                winningScore = winlimit;
-            }
-            else if (maxrounds > 0)
-            {
-                // In MR12 (24 rounds), winning score is 13.
-                // In MR15 (30 rounds), winning score is 16.
-                winningScore = (maxrounds / 2) + 1;
-            }
-
-            if (winningScore > 0)
-            {
-                var teams = Core.EntitySystem.GetAllEntitiesByClass<CCSTeam>();
-                int maxTeamScore = 0;
-                foreach (var team in teams)
-                {
-                   // Calculate total score from halves and overtime
-                   int score = team.ScoreFirstHalf + team.ScoreSecondHalf + team.ScoreOvertime;
-                   if (score > maxTeamScore) maxTeamScore = score;
-                }
-                
-                if (winningScore - maxTeamScore <= _config.EndOfMap.TriggerRoundsBeforeEnd)
-                {
-                    trigger = true;
-                }
-            }
-        }
-
         if (trigger)
         {
             _state.NextEofVotePossibleRound = _state.RoundsPlayed + 1;
