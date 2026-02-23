@@ -3,8 +3,8 @@ using MapChooser.Dependencies;
 using MapChooser.Helpers;
 using MapChooser.Menu;
 using SwiftlyS2.Core.Menus.OptionsBase;
-
 using SwiftlyS2.Shared;
+using SwiftlyS2.Shared.Menus;
 using SwiftlyS2.Shared.Players;
 using System.Threading.Tasks;
 
@@ -29,6 +29,7 @@ public class EndOfMapVoteManager
     private DateTime _voteEndTime;
     private readonly HashSet<int> _playersReceivedMenu = new();
     private int _voteSessionId = 0;
+    private readonly Dictionary<int, IMenuAPI> _activeVoteMenus = new();
 
     public EndOfMapVoteManager(ISwiftlyCore core, PluginState state, VoteManager voteManager, MapLister mapLister, MapCooldown mapCooldown, ChangeMapManager changeMapManager, ExtendManager extendManager, MapChooserConfig config)
     {
@@ -81,6 +82,7 @@ public class EndOfMapVoteManager
         _playerVotes.Clear();
         _playersReceivedMenu.Clear();
         _mapsInVote.Clear();
+        _activeVoteMenus.Clear();
     }
 
     public void StartVote(int voteDuration, int mapsToShow, bool changeImmediately = false, bool isRtv = false)
@@ -261,6 +263,7 @@ public class EndOfMapVoteManager
                 if (hasEofMenuOpen)
                 {
                     _core.MenusAPI.CloseMenuForPlayer(player, currentMenu!);
+                    _activeVoteMenus.Remove(player.Slot);
                 }
                 continue;
             }
@@ -281,10 +284,22 @@ public class EndOfMapVoteManager
                 OpenVoteMenu(player, timeRemaining);
                 _playersReceivedMenu.Add(player.Slot);
             }
-            else if (hasEofMenuOpen)
+            else if (hasEofMenuOpen && _activeVoteMenus.TryGetValue(player.Slot, out var storedMenu))
             {
-                // If they haven't voted but have the menu open, refresh it
-                OpenVoteMenu(player, timeRemaining);
+                // Only update the timer (title) without rebuilding the entire menu
+                // Save current selection position
+                int currentIndex = storedMenu.GetCurrentOptionIndex(player);
+                
+                var localizer = _core.Translation.GetPlayerLocalizer(player);
+                storedMenu.Configuration.Title = (localizer["map_chooser.vote.title"] ?? "Vote for the next map:") 
+                    + $" <font color='red'>({timeRemaining}s)</font>";
+                storedMenu.ShowForPlayer(player);
+                
+                // Restore selection position
+                if (currentIndex >= 0)
+                {
+                    storedMenu.MoveToOptionIndex(player, currentIndex);
+                }
             }
         }
     }
@@ -303,7 +318,8 @@ public class EndOfMapVoteManager
     {
         if (!_voteActive) return;
         var menu = new EndOfMapVoteMenu(_core, _mapCooldown);
-        menu.Show(player, _mapsInVote, _votes, timeRemaining, RegisterVote);
+        var builtMenu = menu.Show(player, _mapsInVote, _votes, timeRemaining, RegisterVote);
+        _activeVoteMenus[player.Slot] = builtMenu;
     }
 
     private void RegisterVote(IPlayer player, string map)
@@ -371,6 +387,7 @@ public class EndOfMapVoteManager
         _votes.Clear();
         _playerVotes.Clear();
         _playersReceivedMenu.Clear();
+        _activeVoteMenus.Clear();
     }
     
     private void EndVote(int sessionId)
@@ -438,6 +455,7 @@ public class EndOfMapVoteManager
             _votes.Clear();
             _playerVotes.Clear();
             _playersReceivedMenu.Clear();
+            _activeVoteMenus.Clear();
         }
     }
 }
