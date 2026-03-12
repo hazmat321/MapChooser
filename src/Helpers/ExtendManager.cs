@@ -48,15 +48,8 @@ public class ExtendManager
             }
             
             var winlimitConVar = _core.ConVar.Find<int>("mp_winlimit");
-            if (winlimitConVar != null)
+            if (winlimitConVar != null && winlimitConVar.Value > 0)
             {
-                // If winlimit is 0, we should initialize it to something sensible before adding
-                // (maxrounds/2 + 1) is standard.
-                if (winlimitConVar.Value == 0 && maxroundsConVar != null) 
-                    winlimitConVar.Value = (maxroundsConVar.Value / 2) + 1;
-                else if (winlimitConVar.Value == 0)
-                    winlimitConVar.Value = 13; // Fallback to MR12
-
                 winlimitConVar.Value += (int)Math.Ceiling(rounds / 2.0);
                 extendedRounds = true;
             }
@@ -64,6 +57,7 @@ public class ExtendManager
 
         // Always set cooldowns to prevent immediate re-triggering of the automated vote
         _state.MapChangeScheduled = false;
+        _state.EofVoteCompleted = false;
         _state.NextEofVotePossibleRound = _state.RoundsPlayed + 1;
         if (_core.Engine?.GlobalVars != null)
             _state.NextEofVotePossibleTime = _core.Engine.GlobalVars.CurrentTime + 60.0f; // 1 minute

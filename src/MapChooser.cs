@@ -14,7 +14,7 @@ using SwiftlyS2.Shared.SchemaDefinitions;
 
 namespace MapChooser;
 
-[PluginMetadata(Id = "MapChooser", Version = "0.0.12-beta", Name = "Map Chooser", Author = "aga", Description = "Map chooser plugin for SwiftlyS2")]
+[PluginMetadata(Id = "MapChooser", Version = "1.0.0", Name = "Map Chooser", Author = "aga", Description = "Map chooser plugin for SwiftlyS2")]
 public sealed class MapChooser : BasePlugin {
     private MapChooserConfig _config = new();
     private MapsConfig _mapsConfig = new();
@@ -130,6 +130,8 @@ public sealed class MapChooser : BasePlugin {
         }
         
         _state.RtvCooldownEndTime = null;
+        _state.IsRtv = false;
+        _state.ChangeMapImmediately = false;
         
         _rtvVoteManager?.Clear();
         _extVoteManager?.Clear();
@@ -183,6 +185,8 @@ public sealed class MapChooser : BasePlugin {
         _state.MapChangeScheduled = false;
         _state.EofVoteHappening = false;
         _state.EofVoteCompleted = false;
+        _state.IsRtv = false;
+        _state.ChangeMapImmediately = false;
         _state.NextMap = null;
         _state.ExtendsLeft = _config.EndOfMap.ExtendLimit;
         
@@ -214,7 +218,7 @@ public sealed class MapChooser : BasePlugin {
     private HookResult OnRoundEnd(EventRoundEnd @event)
     {
         _state.RoundsPlayed++;
-        if (_state.MapChangeScheduled && !_state.EofVoteHappening && !_state.ChangeMapImmediately && _state.IsRtv)
+        if (_state.MapChangeScheduled && !_state.EofVoteHappening && !_state.ChangeMapImmediately)
         {
             _changeMapManager.ChangeMap();
         }

@@ -20,14 +20,13 @@ public class EndOfMapVoteMenu
         _mapCooldown = mapCooldown;
     }
 
-    public IMenuAPI Show(IPlayer player, List<string> mapsInVote, Dictionary<string, int> votes, int timeRemaining, Action<IPlayer, string> onVote)
+    public IMenuAPI Show(IPlayer player, List<string> mapsInVote, Action<IPlayer, string> onVote)
     {
         var localizer = _core.Translation.GetPlayerLocalizer(player);
         var builder = _core.MenusAPI.CreateBuilder();
-        builder.Design.SetMenuTitle((localizer["map_chooser.vote.title"] ?? "Vote for the next map:") + $" <font color='red'>({timeRemaining}s)</font>");
+        builder.Design.SetMenuTitle(localizer["map_chooser.vote.title"] ?? "Vote for the next map:");
         foreach (var map in mapsInVote)
         {
-            int count = votes.ContainsKey(map) ? votes[map] : 0;
             string displayName = map;
             bool isExtend = map == "map_chooser.extend_option";
             if (isExtend)
@@ -35,7 +34,7 @@ public class EndOfMapVoteMenu
                 displayName = localizer["map_chooser.extend_option"];
             }
 
-            var option = new ButtonMenuOption($"{(isExtend ? "<font color='orange'>" : "<font color='lightgreen'>")}{displayName}</font> <font color='red'>[{count}]</font>");
+            var option = new ButtonMenuOption($"{(isExtend ? "<font color='orange'>" : "<font color='lightgreen'>")}{displayName}</font>");
             option.Enabled = isExtend || !_mapCooldown.IsMapInCooldown(map);
             option.Click += (sender, args) =>
             {

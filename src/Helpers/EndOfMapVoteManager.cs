@@ -198,9 +198,9 @@ public class EndOfMapVoteManager
 
         _voteEndTime = DateTime.Now.AddSeconds(voteDuration);
 
-        // Show menu to all players and start timer
-        RunVoteTimer(_voteSessionId);
+        // Show menu to all players first, then start the periodic timer
         RefreshVoteMenu(true);
+        _core.Scheduler.DelayBySeconds(1, () => RunVoteTimer(_voteSessionId));
     }
 
     public void StartCustomVote(List<string> maps, int voteDuration, bool changeImmediately = false)
@@ -226,8 +226,8 @@ public class EndOfMapVoteManager
 
         _voteEndTime = DateTime.Now.AddSeconds(voteDuration);
 
-        RunVoteTimer(_voteSessionId);
         RefreshVoteMenu(true);
+        _core.Scheduler.DelayBySeconds(1, () => RunVoteTimer(_voteSessionId));
     }
 
     private void RunVoteTimer(int sessionId)
@@ -242,8 +242,6 @@ public class EndOfMapVoteManager
             EndVote(sessionId);
             return;
         }
-
-        RefreshVoteMenu();
 
         _core.Scheduler.DelayBySeconds(1, () => RunVoteTimer(sessionId));
     }
@@ -270,9 +268,10 @@ public class EndOfMapVoteManager
 
             if (_playerVotes.ContainsKey(player.Slot))
             {
-                // If they already voted, only refresh if they still have the menu open
+                // Only close if they don't have the menu open (e.g. they used !revote)
                 if (hasEofMenuOpen)
                 {
+                    // They re-opened via !revote — treat them as a normal voter and rebuild
                     OpenVoteMenu(player, timeRemaining);
                 }
                 continue;
@@ -280,26 +279,36 @@ public class EndOfMapVoteManager
 
             if (forceOpen || !_playersReceivedMenu.Contains(player.Slot))
             {
-                // First time opening for this player or forced open
                 OpenVoteMenu(player, timeRemaining);
                 _playersReceivedMenu.Add(player.Slot);
             }
-            else if (hasEofMenuOpen && _activeVoteMenus.TryGetValue(player.Slot, out var storedMenu))
+        }
+    }
+
+    private void RefreshVoteMenuTitle()
+    {
+        if (!_voteActive) return;
+
+        int timeRemaining = (int)Math.Max(0, Math.Ceiling((_voteEndTime - DateTime.Now).TotalSeconds));
+        foreach (var player in _core.PlayerManager.GetAllPlayers().Where(p => p.IsValid))
+        {
+            var currentMenu = _core.MenusAPI.GetCurrentMenu(player);
+            bool hasEofMenuOpen = currentMenu?.Tag?.ToString() == "EofVoteMenu";
+
+            if (!_config.AllowSpectatorsToVote && player.Controller?.TeamNum == 1)
             {
-                // Only update the timer (title) without rebuilding the entire menu
-                // Save current selection position
-                int currentIndex = storedMenu.GetCurrentOptionIndex(player);
-                
-                var localizer = _core.Translation.GetPlayerLocalizer(player);
-                storedMenu.Configuration.Title = (localizer["map_chooser.vote.title"] ?? "Vote for the next map:") 
-                    + $" <font color='red'>({timeRemaining}s)</font>";
-                storedMenu.ShowForPlayer(player);
-                
-                // Restore selection position
-                if (currentIndex >= 0)
+                if (hasEofMenuOpen)
                 {
-                    storedMenu.MoveToOptionIndex(player, currentIndex);
+                    _core.MenusAPI.CloseMenuForPlayer(player, currentMenu!);
+                    _activeVoteMenus.Remove(player.Slot);
                 }
+                continue;
+            }
+
+            if (!_playersReceivedMenu.Contains(player.Slot))
+            {
+                OpenVoteMenu(player, timeRemaining);
+                _playersReceivedMenu.Add(player.Slot);
             }
         }
     }
@@ -310,15 +319,14 @@ public class EndOfMapVoteManager
         if (!_voteActive) return;
         if (!_config.AllowSpectatorsToVote && player.Controller?.TeamNum == 1) return;
         _playersReceivedMenu.Add(player.Slot); // Mark as received so it starts refreshing
-        int timeRemaining = (int)Math.Max(0, Math.Ceiling((_voteEndTime - DateTime.Now).TotalSeconds));
-        OpenVoteMenu(player, timeRemaining);
+        OpenVoteMenu(player, 0);
     }
 
     public void OpenVoteMenu(IPlayer player, int timeRemaining)
     {
         if (!_voteActive) return;
         var menu = new EndOfMapVoteMenu(_core, _mapCooldown);
-        var builtMenu = menu.Show(player, _mapsInVote, _votes, timeRemaining, RegisterVote);
+        var builtMenu = menu.Show(player, _mapsInVote, RegisterVote);
         _activeVoteMenus[player.Slot] = builtMenu;
     }
 
@@ -344,10 +352,8 @@ public class EndOfMapVoteManager
         if (currentMenu?.Tag?.ToString() == "EofVoteMenu")
         {
             _core.MenusAPI.CloseMenuForPlayer(player, currentMenu);
+            _activeVoteMenus.Remove(slot);
         }
-
-        // Refresh menu for everyone to show new counts
-        RefreshVoteMenu();
     }
     
     public void RemoveMapVote(IPlayer player)
@@ -360,9 +366,6 @@ public class EndOfMapVoteManager
             string map = _playerVotes[slot];
             _votes[map]--;
             _playerVotes.Remove(slot);
-            
-            // Refresh menu for everyone to show new counts
-            RefreshVoteMenu();
         }
     }
 
