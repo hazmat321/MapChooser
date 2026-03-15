@@ -24,6 +24,7 @@
   "map_chooser.nominate.success": "[green]{0}[default] nomeou [green]{1}[default].",
   "map_chooser.votemap.title": "Vote no próximo mapa:",
   "map_chooser.nominate.title": "Nomear um mapa:",
+  "map_chooser.change_map.title": "Trocar mapa para:",
   "map_chooser.timeleft.prefix": "[green][Timeleft][default]",
   "map_chooser.timeleft.remaining_time_hour": "Tempo restante {0}:{1}:{2}",
   "map_chooser.timeleft.remaining_time_minute": "Tempo restante {0} minuto(s) e {1} segundo(s)",

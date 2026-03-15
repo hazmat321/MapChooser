@@ -24,6 +24,7 @@
   "map_chooser.nominate.success": "[green]{0}[default] 提名了 [green]{1}[default]。",
   "map_chooser.votemap.title": "投票选择下一张地图：",
   "map_chooser.nominate.title": "提名一张地图：",
+  "map_chooser.change_map.title": "更换地图为：",
   "map_chooser.timeleft.prefix": "[green][剩余时间][default]",
   "map_chooser.timeleft.remaining_time_hour": "剩余时间 {0}:{1}:{2}",
   "map_chooser.timeleft.remaining_time_minute": "剩余时间 {0} 分钟 {1} 秒",

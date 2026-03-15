@@ -1,15 +1,15 @@
-using MapChooser.Models;
+using Admins.Menu.Contract;
+using MapChooser.Commands;
 using MapChooser.Dependencies;
 using MapChooser.Helpers;
-using MapChooser.Commands;
+using MapChooser.Models;
+using Microsoft.Extensions.Configuration;
 using SwiftlyS2.Shared;
 using SwiftlyS2.Shared.Commands;
 using SwiftlyS2.Shared.Events;
 using SwiftlyS2.Shared.GameEventDefinitions;
 using SwiftlyS2.Shared.Misc;
 using SwiftlyS2.Shared.Plugins;
-using SwiftlyS2.Shared.Players;
-using Microsoft.Extensions.Configuration;
 using SwiftlyS2.Shared.SchemaDefinitions;
 
 namespace MapChooser;
@@ -44,9 +44,6 @@ public sealed class MapChooser : BasePlugin {
     }
 
     public override void ConfigureSharedInterface(IInterfaceManager interfaceManager) {
-    }
-
-    public override void UseSharedInterface(IInterfaceManager interfaceManager) {
     }
 
     public override void Load(bool hotReload) {
@@ -90,7 +87,7 @@ public sealed class MapChooser : BasePlugin {
         _setNextMapCmd = new SetNextMapCommand(Core, _state, _mapLister, _changeMapManager);
         _extendCmd = new ExtendCommand(Core, _state, _extVoteManager, _extendManager, _config);
         _adminMapsVoteCmd = new AdminMapsVoteCommand(Core, _state, _mapLister, _eofManager, _config);
-        _adminChangeMapCmd = new AdminChangeMapCommand(_state, _mapLister, _changeMapManager);
+        _adminChangeMapCmd = new AdminChangeMapCommand(Core, _state, _mapLister, _changeMapManager);
 
         RegisterCommands(_config.Commands.Rtv, _rtvCmd.Execute);
         RegisterCommands(_config.Commands.UnRtv, _unRtvCmd.Execute);
