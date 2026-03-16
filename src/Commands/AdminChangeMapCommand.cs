@@ -25,25 +25,27 @@ public class AdminChangeMapCommand
 
     public void Execute(ICommandContext context)
     {
-        if (!context.IsSentByPlayer)
-        {
-            context.Reply("This command can only be used by players.");
-            return;
-        }
-
         var player = context.Sender!;
         var map = context.Args.Length > 0 ? context.Args[0] : null;
         if (string.IsNullOrEmpty(map))
         {
+            if (!context.IsSentByPlayer)
+            {
+                context.Reply("This command can only be used by players.");
+                return;
+            }
+
             var menu = new AdminChangeMapMenu(_core, _mapLister);
             menu.Show(player, HandleChangeMap);
             return;
         }
 
+        var localizer = _core.Translation.GetPlayerLocalizer(player);
+
         var mapInfo = _mapLister.Maps.FirstOrDefault(m => m.Name.Contains(map, StringComparison.OrdinalIgnoreCase) || (m.Id != null && m.Id.Equals(map, StringComparison.OrdinalIgnoreCase)));
         if (mapInfo == null)
         {
-            context.Reply($"Map \"{map}\" not found.");
+            context.Reply(localizer["map_chooser.change_map.not_found", map]);
             return;
         }
 

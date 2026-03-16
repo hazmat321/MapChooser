@@ -15,6 +15,7 @@
   "map_chooser.next_map_announced": "Próximo mapa será [green]{0}[default].",
   "map_chooser.changing_map": "Trocando o mapa para [green]{0}[default] em {1} segundos...",
   "map_chooser.nominate.not_found": "Mapa [darkred]{0}[default] não encontrado.",
+  "map_chooser.change_map.not_found": "Mapa solicitado [grey]\"{0}\" [default]não foi encontrado na lista de mapas.",
   "map_chooser.nominate.current_map": "Você não pode nomear o mapa atual.",
   "map_chooser.votemap.cooldown": "Mapa [darkred]{0}[default] está em cooldown.",
   "map_chooser.votemap.voted": "[green]{0}[default] votou em [green]{1}[default]. [darkred]({2}/{3} votos necessários)",
