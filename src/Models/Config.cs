@@ -58,6 +58,7 @@ public class CommandsConfig
     public string SetNextMap { get; set; } = "setnextmap";
     public string Extend { get; set; } = "ext,extendmap";
     public string MapsVote { get; set; } = "mapsvote";
+    public string ChangeMap { get; set; } = "map,setmap";
 }
 
 public class MapChooserConfig
@@ -71,6 +72,7 @@ public class MapChooserConfig
     public bool AllowSpectatorsToVote { get; set; } = false;
     public string SetNextMapPermission { get; set; } = "admin.changemap";
     public string MapsVotePermission { get; set; } = "admin.mapsvote";
+    public string ChangeMapPermission { get; set; } = "admin.changemap";
 }
 
 public class MapsConfig

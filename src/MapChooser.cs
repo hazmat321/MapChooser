@@ -1,15 +1,15 @@
-using MapChooser.Models;
+using Admins.Menu.Contract;
+using MapChooser.Commands;
 using MapChooser.Dependencies;
 using MapChooser.Helpers;
-using MapChooser.Commands;
+using MapChooser.Models;
+using Microsoft.Extensions.Configuration;
 using SwiftlyS2.Shared;
 using SwiftlyS2.Shared.Commands;
 using SwiftlyS2.Shared.Events;
 using SwiftlyS2.Shared.GameEventDefinitions;
 using SwiftlyS2.Shared.Misc;
 using SwiftlyS2.Shared.Plugins;
-using SwiftlyS2.Shared.Players;
-using Microsoft.Extensions.Configuration;
 using SwiftlyS2.Shared.SchemaDefinitions;
 
 namespace MapChooser;
@@ -37,15 +37,13 @@ public sealed class MapChooser : BasePlugin {
     private SetNextMapCommand _setNextMapCmd = null!;
     private ExtendCommand _extendCmd = null!;
     private AdminMapsVoteCommand _adminMapsVoteCmd = null!;
+    private AdminChangeMapCommand _adminChangeMapCmd = null!;
 
     public MapChooser(ISwiftlyCore core) : base(core)
     {
     }
 
     public override void ConfigureSharedInterface(IInterfaceManager interfaceManager) {
-    }
-
-    public override void UseSharedInterface(IInterfaceManager interfaceManager) {
     }
 
     public override void Load(bool hotReload) {
@@ -89,6 +87,7 @@ public sealed class MapChooser : BasePlugin {
         _setNextMapCmd = new SetNextMapCommand(Core, _state, _mapLister, _changeMapManager);
         _extendCmd = new ExtendCommand(Core, _state, _extVoteManager, _extendManager, _config);
         _adminMapsVoteCmd = new AdminMapsVoteCommand(Core, _state, _mapLister, _eofManager, _config);
+        _adminChangeMapCmd = new AdminChangeMapCommand(Core, _state, _mapLister, _changeMapManager);
 
         RegisterCommands(_config.Commands.Rtv, _rtvCmd.Execute);
         RegisterCommands(_config.Commands.UnRtv, _unRtvCmd.Execute);
@@ -100,6 +99,7 @@ public sealed class MapChooser : BasePlugin {
         RegisterCommands(_config.Commands.SetNextMap, _setNextMapCmd.Execute, permission: _config.SetNextMapPermission);
         RegisterCommands(_config.Commands.Extend, _extendCmd.Execute);
         RegisterCommands(_config.Commands.MapsVote, _adminMapsVoteCmd.Execute, permission: _config.MapsVotePermission);
+        RegisterCommands(_config.Commands.ChangeMap, _adminChangeMapCmd.Execute, permission: _config.ChangeMapPermission);
 
         Core.GameEvent.HookPost<EventRoundEnd>(OnRoundEnd);
         Core.GameEvent.HookPost<EventRoundStart>(OnRoundStart);

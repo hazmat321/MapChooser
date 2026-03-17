@@ -25,10 +25,11 @@ MapChooser is a map voting plugin for SwiftlyS2. It handles Rock The Vote (RTV),
 | `!nextmap` | Shows which map will be played next (if decided). |
 | `!votemap [map]` | Directly votes for a specific map to change to. |
 | `!revote` | Reopens the map vote menu if a vote is currently active. |
-| `!setnextmap [map]` | Sets the next map directly or opens a selection menu (Admin only). |
-| `!mapsvote` | Opens a menu to select multiple maps and start a custom vote (Admin only). |
 | `!extend` | Votes to extend the current map. |
 | `!unrtv` | Removes your current RTV vote. |
+| `!setnextmap [map]` | Sets the next map directly or opens a selection menu (Admin only). |
+| `!mapsvote` | Opens a menu to select multiple maps and start a custom vote (Admin only). |
+| `!map` | Loads requested map (Admin only). |
 
 ## Configuration (`config.jsonc`)
 
