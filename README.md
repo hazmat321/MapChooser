@@ -101,30 +101,34 @@ Each map entry supports the following properties:
 
 #### Example
 ```jsonc
-"Maps": [
-    {
-        "Name": "Dust II",
-        "Id": "de_dust2",
-        "MinPlayers": 4
-    },
-    {
-        "Name": "Inferno Night",
-        "Id": "3124567099",
-        "MinPlayers": 4
-    },
-    {
-        "Name": "Mirage",
-        "Id": "de_mirage",
-        "MinPlayers": 1,
-        "MaxPlayers": 3
-    },
-    {
-        "Name": "Overpass",
-        "Id": "de_overpass",
-        "MinPlayers": 1,
-        "MaxPlayers": 3
+{
+    "MapChooserMaps": {
+        "Maps": [
+            {
+                "Name": "Dust II",
+                "Id": "de_dust2",
+                "MinPlayers": 4
+            },
+            {
+                "Name": "Inferno Night",
+                "Id": "3124567099",
+                "MinPlayers": 4
+            },
+            {
+                "Name": "Mirage",
+                "Id": "de_mirage",
+                "MinPlayers": 1,
+                "MaxPlayers": 3
+            },
+            {
+                "Name": "Overpass",
+                "Id": "de_overpass",
+                "MinPlayers": 1,
+                "MaxPlayers": 3
+            }
+        ]
     }
-]
+}
 ```
 
 In this example, when there are 1–3 real players on the server, only `aim_redline_snow` and `AWP LEGO` will appear in votes and nominations. Once there are 4+ players, only `Dust II` and `Inferno Night` will be available.
