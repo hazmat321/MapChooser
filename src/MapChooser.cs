@@ -1,4 +1,3 @@
-using Admins.Menu.Contract;
 using MapChooser.Commands;
 using MapChooser.Dependencies;
 using MapChooser.Helpers;
