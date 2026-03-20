@@ -1,5 +1,4 @@
-﻿using Admins.Menu.Contract;
-using MapChooser.Dependencies;
+﻿using MapChooser.Dependencies;
 using MapChooser.Helpers;
 using MapChooser.Menu;
 using SwiftlyS2.Shared;
@@ -26,7 +25,7 @@ public class AdminChangeMapCommand
     public void Execute(ICommandContext context)
     {
         var player = context.Sender!;
-        var map = context.Args.Length > 0 ? context.Args[0] : null;
+        var map = context.Args.Length > 0 ? string.Join(" ", context.Args) : null;
         if (string.IsNullOrEmpty(map))
         {
             if (!context.IsSentByPlayer)
