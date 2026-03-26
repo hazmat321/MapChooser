@@ -48,7 +48,8 @@
             "Revote": "revote",
             "SetNextMap": "setnextmap",
             "Extend": "ext,extendmap",
-            "MapsVote": "mapsvote"
+            "MapsVote": "mapsvote",
+            "MapList": "maplist,maps"
         },
         "AllowSpectatorsToVote": false,
         "SetNextMapPermission": "admin.changemap",

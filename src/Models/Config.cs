@@ -59,6 +59,7 @@ public class CommandsConfig
     public string Extend { get; set; } = "ext,extendmap";
     public string MapsVote { get; set; } = "mapsvote";
     public string ChangeMap { get; set; } = "map,setmap";
+    public string MapList { get; set; } = "maplist,maps";
 }
 
 public class MapChooserConfig

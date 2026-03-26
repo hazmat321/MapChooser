@@ -13,7 +13,7 @@ using SwiftlyS2.Shared.SchemaDefinitions;
 
 namespace MapChooser;
 
-[PluginMetadata(Id = "MapChooser", Version = "1.0.2", Name = "Map Chooser", Author = "aga", Description = "Map chooser plugin for SwiftlyS2")]
+[PluginMetadata(Id = "MapChooser", Version = "1.0.3", Name = "Map Chooser", Author = "aga", Description = "Map chooser plugin for SwiftlyS2")]
 public sealed class MapChooser : BasePlugin {
     private MapChooserConfig _config = new();
     private MapsConfig _mapsConfig = new();
@@ -37,6 +37,7 @@ public sealed class MapChooser : BasePlugin {
     private ExtendCommand _extendCmd = null!;
     private AdminMapsVoteCommand _adminMapsVoteCmd = null!;
     private AdminChangeMapCommand _adminChangeMapCmd = null!;
+    private MapListCommand _mapListCmd = null!;
 
     public MapChooser(ISwiftlyCore core) : base(core)
     {
@@ -87,6 +88,7 @@ public sealed class MapChooser : BasePlugin {
         _extendCmd = new ExtendCommand(Core, _state, _extVoteManager, _extendManager, _config);
         _adminMapsVoteCmd = new AdminMapsVoteCommand(Core, _state, _mapLister, _eofManager, _config);
         _adminChangeMapCmd = new AdminChangeMapCommand(Core, _state, _mapLister, _changeMapManager);
+        _mapListCmd = new MapListCommand(Core, _mapLister, _mapCooldown);
 
         RegisterCommands(_config.Commands.Rtv, _rtvCmd.Execute);
         RegisterCommands(_config.Commands.UnRtv, _unRtvCmd.Execute);
@@ -99,6 +101,7 @@ public sealed class MapChooser : BasePlugin {
         RegisterCommands(_config.Commands.Extend, _extendCmd.Execute);
         RegisterCommands(_config.Commands.MapsVote, _adminMapsVoteCmd.Execute, permission: _config.MapsVotePermission);
         RegisterCommands(_config.Commands.ChangeMap, _adminChangeMapCmd.Execute, permission: _config.ChangeMapPermission);
+        RegisterCommands(_config.Commands.MapList, _mapListCmd.Execute);
 
         Core.GameEvent.HookPost<EventRoundEnd>(OnRoundEnd);
         Core.GameEvent.HookPost<EventRoundStart>(OnRoundStart);
