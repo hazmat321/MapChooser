@@ -13,7 +13,7 @@ using SwiftlyS2.Shared.SchemaDefinitions;
 
 namespace MapChooser;
 
-[PluginMetadata(Id = "MapChooser", Version = "1.0.1", Name = "Map Chooser", Author = "aga", Description = "Map chooser plugin for SwiftlyS2")]
+[PluginMetadata(Id = "MapChooser", Version = "1.0.2", Name = "Map Chooser", Author = "aga", Description = "Map chooser plugin for SwiftlyS2")]
 public sealed class MapChooser : BasePlugin {
     private MapChooserConfig _config = new();
     private MapsConfig _mapsConfig = new();
@@ -232,13 +232,6 @@ public sealed class MapChooser : BasePlugin {
     private void CheckAutomatedVote(bool force = false)
     {
         if (!_config.EndOfMap.Enabled || _state.EofVoteHappening || _state.EofVoteCompleted || _state.MapChangeScheduled || _state.WarmupRunning) return;
-
-        // Sync rounds played with engine for better accuracy
-        var gameRules = Core.EntitySystem.GetGameRules();
-        if (gameRules != null)
-        {
-            _state.RoundsPlayed = gameRules.TotalRoundsPlayed;
-        }
 
         if (!force)
         {
