@@ -13,7 +13,7 @@ using SwiftlyS2.Shared.SchemaDefinitions;
 
 namespace MapChooser;
 
-[PluginMetadata(Id = "MapChooser", Version = "1.0.4", Name = "Map Chooser", Author = "aga", Description = "Map chooser plugin for SwiftlyS2")]
+[PluginMetadata(Id = "MapChooser", Version = "1.0.5", Name = "Map Chooser", Author = "aga", Description = "Map chooser plugin for SwiftlyS2")]
 public sealed class MapChooser : BasePlugin {
     private MapChooserConfig _config = new();
     private MapsConfig _mapsConfig = new();
@@ -268,43 +268,32 @@ public sealed class MapChooser : BasePlugin {
 
         if (!trigger && maxrounds > 0)
         {
-            int roundsRemaining = maxrounds - _state.RoundsPlayed;
-            if (roundsRemaining <= _config.EndOfMap.TriggerRoundsBeforeEnd)
+            // RoundsPlayed resets to 0 at halftime (OnMatchStart), so compare against
+            // the half-length (maxrounds/2) rather than the full match value.
+            int halfLength = maxrounds / 2;
+            int roundsRemainingInHalf = halfLength - _state.RoundsPlayed;
+            if (roundsRemainingInHalf <= _config.EndOfMap.TriggerRoundsBeforeEnd)
             {
                 trigger = true;
             }
         }
 
-        // New Logic: Check score proximity to winning (Match Point)
-        if (!trigger)
+        // Score-proximity check: only use an explicit winlimit convar.
+        // Do NOT derive winningScore from maxrounds — that caused false triggers at
+        // halftime (e.g. 10-0 with maxrounds=20 → derived winningScore=11, 11-10=1 ≤ TriggerRoundsBeforeEnd).
+        if (!trigger && winlimit > 0)
         {
-            int winningScore = 0;
-            if (winlimit > 0)
+            var teams = Core.EntitySystem.GetAllEntitiesByClass<CCSTeam>();
+            int maxTeamScore = 0;
+            foreach (var team in teams)
             {
-                winningScore = winlimit;
-            }
-            else if (maxrounds > 0)
-            {
-                // In MR12 (24 rounds), winning score is 13.
-                // In MR15 (30 rounds), winning score is 16.
-                winningScore = (maxrounds / 2) + 1;
+                int score = team.ScoreFirstHalf + team.ScoreSecondHalf + team.ScoreOvertime;
+                if (score > maxTeamScore) maxTeamScore = score;
             }
 
-            if (winningScore > 0)
+            if (winlimit - maxTeamScore <= _config.EndOfMap.TriggerRoundsBeforeEnd)
             {
-                var teams = Core.EntitySystem.GetAllEntitiesByClass<CCSTeam>();
-                int maxTeamScore = 0;
-                foreach (var team in teams)
-                {
-                   // Calculate total score from halves and overtime
-                   int score = team.ScoreFirstHalf + team.ScoreSecondHalf + team.ScoreOvertime;
-                   if (score > maxTeamScore) maxTeamScore = score;
-                }
-                
-                if (winningScore - maxTeamScore <= _config.EndOfMap.TriggerRoundsBeforeEnd)
-                {
-                    trigger = true;
-                }
+                trigger = true;
             }
         }
 

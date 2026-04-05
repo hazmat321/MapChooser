@@ -19,7 +19,7 @@ public class VotemapConfig
 {
     public bool Enabled { get; set; } = true;
     public int VotePercentage { get; set; } = 60;
-    public bool ChangeMapImmediately { get; set; } = true;
+    public bool ChangeMapImmediately { get; set; } = false;
     public int MinPlayers { get; set; } = 0;
 }
 
