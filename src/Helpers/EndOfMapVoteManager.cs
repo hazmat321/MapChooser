@@ -99,7 +99,6 @@ public class EndOfMapVoteManager
         _playerVotes.Clear();
         _playersReceivedMenu.Clear();
 
-        // Get current map name to exclude it from the vote
         var currentMapId = _core.Engine.GlobalVars.MapName.ToString();
         var currentWorkshopId = _core.Engine.WorkshopId;
 
@@ -110,7 +109,6 @@ public class EndOfMapVoteManager
             .Where(m => m.IsValidForPlayerCount(playerCount))
             .ToList();
         
-        // Find the current map's display name BEFORE filtering allMaps
         string? currentMapDisplayName = null;
         if (!string.IsNullOrEmpty(currentMapId) || !string.IsNullOrEmpty(currentWorkshopId))
         {
@@ -120,15 +118,10 @@ public class EndOfMapVoteManager
             )?.Name;
         }
         
-        // Exclude current map from all maps list by comparing against Map.Id
-        // For workshop maps, also check against the workshop ID
         if (!string.IsNullOrEmpty(currentMapId) || !string.IsNullOrEmpty(currentWorkshopId))
         {
             allMaps = allMaps.Where(m => {
-                // Match by regular map ID (e.g., "de_mirage")
                 var matchesMapId = !string.IsNullOrEmpty(currentMapId) && string.Equals(m.Id, currentMapId, StringComparison.OrdinalIgnoreCase);
-                
-                // Match by workshop ID (e.g., "3124567099")
                 var matchesWorkshopId = !string.IsNullOrEmpty(currentWorkshopId) && string.Equals(m.Id, currentWorkshopId, StringComparison.OrdinalIgnoreCase);
                 
                 return !(matchesMapId || matchesWorkshopId);
@@ -144,7 +137,6 @@ public class EndOfMapVoteManager
             })
             .ToList();
         
-        // Exclude current map from nominations using the display name we found earlier
         if (!string.IsNullOrEmpty(currentMapDisplayName))
         {
             nominations = nominations.Where(n => !n.Equals(currentMapDisplayName, StringComparison.OrdinalIgnoreCase)).ToList();
@@ -153,8 +145,7 @@ public class EndOfMapVoteManager
         var random = new Random();
 
         _mapsInVote = new List<string>();
-        
-        // Add nominations first (nominations are already map display names)
+
         if (nominations.Count >= mapsToShow)
         {
             _mapsInVote.AddRange(nominations.OrderBy(x => random.Next()).Take(mapsToShow));
@@ -162,15 +153,11 @@ public class EndOfMapVoteManager
         else
         {
             _mapsInVote.AddRange(nominations);
-            
-            // Fill rest with random maps (use display names from Map objects)
             var remainingSlots = mapsToShow - _mapsInVote.Count;
             var candidateMaps = allMaps.Where(m => !_mapsInVote.Contains(m.Name) && !_mapCooldown.IsMapInCooldown(m)).ToList();
             _mapsInVote.AddRange(candidateMaps.Select(m => m.Name).OrderBy(x => random.Next()).Take(remainingSlots));
         }
 
-        // If some nominations were removed due to cooldown, top up again.
-        // (Extend option is added separately and should not count towards mapsToShow.)
         if (_mapsInVote.Count < mapsToShow)
         {
             var remainingSlots = mapsToShow - _mapsInVote.Count;
@@ -187,7 +174,6 @@ public class EndOfMapVoteManager
             _mapsInVote.Add("map_chooser.extend_option");
         }
 
-        // Safety filter (should already be handled for normal maps, but keep extend allowed)
         _mapsInVote = _mapsInVote.Where(m => !IsMapInCooldownForVote(m)).ToList();
 
 
@@ -198,7 +184,6 @@ public class EndOfMapVoteManager
 
         _voteEndTime = DateTime.Now.AddSeconds(voteDuration);
 
-        // Show menu to all players first, then start the periodic timer
         RefreshVoteMenu(true);
         _core.Scheduler.DelayBySeconds(1, () => RunVoteTimer(_voteSessionId));
     }
@@ -268,12 +253,8 @@ public class EndOfMapVoteManager
 
             if (_playerVotes.ContainsKey(player.Slot))
             {
-                // Only close if they don't have the menu open (e.g. they used !revote)
                 if (hasEofMenuOpen)
-                {
-                    // They re-opened via !revote — treat them as a normal voter and rebuild
                     OpenVoteMenu(player, timeRemaining);
-                }
                 continue;
             }
 
@@ -313,12 +294,11 @@ public class EndOfMapVoteManager
         }
     }
     
-    // Kept for backward compatibility if needed, but not used internally now
     public void OpenVoteMenu(IPlayer player)
     {
         if (!_voteActive) return;
         if (!_config.AllowSpectatorsToVote && player.Controller?.TeamNum == 1) return;
-        _playersReceivedMenu.Add(player.Slot); // Mark as received so it starts refreshing
+        _playersReceivedMenu.Add(player.Slot);
         OpenVoteMenu(player, 0);
     }
 
@@ -376,16 +356,13 @@ public class EndOfMapVoteManager
         _state.EofVoteHappening = false;
         _isRtvVote = false;
 
-        // Close menus for players
         foreach (var player in _core.PlayerManager.GetAllPlayers().Where(p => p.IsValid))
         {
             var menu = _core.MenusAPI.GetCurrentMenu(player);
             if (menu?.Tag?.ToString() == "EofVoteMenu")
-            {
                 _core.MenusAPI.CloseMenuForPlayer(player, menu);
-            }
         }
-        
+
         _core.PlayerManager.SendChat(_core.Localizer["map_chooser.prefix"] + " " + _core.Localizer["map_chooser.rtv.vote_cancelled"]);
         _votes.Clear();
         _playerVotes.Clear();
@@ -393,6 +370,12 @@ public class EndOfMapVoteManager
         _activeVoteMenus.Clear();
     }
     
+    public void ForceEnd()
+    {
+        if (_voteActive)
+            EndVote(_voteSessionId);
+    }
+
     private void EndVote(int sessionId)
     {
         if (!_voteActive) return;
@@ -402,7 +385,6 @@ public class EndOfMapVoteManager
         {
             _state.EofVoteCompleted = true;
 
-            // Clear RTV votes if this was an RTV vote
             if (_isRtvVote)
             {
                 _voteManager.Clear();
@@ -446,14 +428,11 @@ public class EndOfMapVoteManager
             _state.EofVoteHappening = false;
             _isRtvVote = false;
 
-            // Check and close menus for players
             foreach (var player in _core.PlayerManager.GetAllPlayers().Where(p => p.IsValid))
             {
                 var menu = _core.MenusAPI.GetCurrentMenu(player);
                 if (menu?.Tag?.ToString() == "EofVoteMenu")
-                {
                     _core.MenusAPI.CloseMenuForPlayer(player, menu);
-                }
             }
             
             _votes.Clear();

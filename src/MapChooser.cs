@@ -205,18 +205,13 @@ public sealed class MapChooser : BasePlugin {
 
     private HookResult OnWinPanelMatch(EventCsWinPanelMatch @event)
     {
-        // EventCsWinPanelMatch also fires at halftime — ignore it then.
         if (Core.Game.MatchData.Phase == GamePhase.GAMEPHASE_HALFTIME) return HookResult.Continue;
 
         _state.MatchEnded = true;
         if (_state.EofVoteHappening)
-        {
-            // Vote is still going when match ends.
-        }
+            _eofManager.ForceEnd();
         else if (_state.MapChangeScheduled)
-        {
             _changeMapManager.ChangeMap();
-        }
         return HookResult.Continue;
     }
 
@@ -239,14 +234,10 @@ public sealed class MapChooser : BasePlugin {
     {
         if (!_config.EndOfMap.Enabled || _state.EofVoteHappening || _state.MapChangeScheduled || _state.ChangeMapImmediately || _state.WarmupRunning) return;
 
-        // Never start a vote during halftime.
         if (Core.Game.MatchData.Phase == GamePhase.GAMEPHASE_HALFTIME) return;
 
         int totalRoundsPlayed = Core.Game.MatchData.TerroristScoreTotal + Core.Game.MatchData.CTScoreTotal;
 
-        // Safety net: if the vote already completed but no next map was decided (e.g. all maps
-        // were on cooldown, or vote result was lost), bypass the completed flag and cooldown
-        // guards so the vote can re-fire now that we're past the trigger threshold.
         bool pastDueNoMap = _state.EofVoteCompleted && string.IsNullOrEmpty(_state.NextMap);
 
         if (!force && !pastDueNoMap)
@@ -289,9 +280,6 @@ public sealed class MapChooser : BasePlugin {
             }
         }
 
-        // Score-proximity check: only use an explicit winlimit convar.
-        // Do NOT derive winningScore from maxrounds — that caused false triggers at
-        // halftime (e.g. 10-0 with maxrounds=20 → derived winningScore=11, 11-10=1 ≤ TriggerRoundsBeforeEnd).
         if (!trigger && winlimit > 0)
         {
             var teams = Core.EntitySystem.GetAllEntitiesByClass<CCSTeam>();
