@@ -410,6 +410,7 @@ public class EndOfMapVoteManager
 
             if (_isRtvVote && _playerVotes.Count == 0)
             {
+                _state.EofVoteCompleted = false;
                 _core.PlayerManager.SendChat(_core.Localizer["map_chooser.prefix"] + " " + _core.Localizer["map_chooser.rtv.vote_failed_no_votes"]);
                 _state.RtvCooldownEndTime = DateTime.Now.AddSeconds(_config.Rtv.VoteCooldownTime);
                 return;

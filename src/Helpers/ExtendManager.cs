@@ -39,10 +39,8 @@ public class ExtendManager
         if (rounds > 0)
         {
             var maxroundsConVar = _core.ConVar.Find<int>("mp_maxrounds");
-            if (maxroundsConVar != null)
+            if (maxroundsConVar != null && maxroundsConVar.Value > 0)
             {
-                // If maxrounds is 0, it might be using default. Let's assume MR12 (24) as starting point if 0
-                if (maxroundsConVar.Value == 0) maxroundsConVar.Value = 24;
                 maxroundsConVar.Value += rounds;
                 extendedRounds = true;
             }
@@ -58,7 +56,9 @@ public class ExtendManager
         // Always set cooldowns to prevent immediate re-triggering of the automated vote
         _state.MapChangeScheduled = false;
         _state.EofVoteCompleted = false;
-        _state.NextEofVotePossibleRound = _state.RoundsPlayed + 1;
+        // Use the cumulative total from MatchData — _state.RoundsPlayed resets at halftime and would
+        // produce a stale (too-low) value here, causing CheckAutomatedVote to re-fire immediately.
+        _state.NextEofVotePossibleRound = _core.Game.MatchData.TerroristScoreTotal + _core.Game.MatchData.CTScoreTotal + 1;
         if (_core.Engine?.GlobalVars != null)
             _state.NextEofVotePossibleTime = _core.Engine.GlobalVars.CurrentTime + 60.0f; // 1 minute
 

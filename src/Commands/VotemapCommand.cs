@@ -44,6 +44,17 @@ public class VotemapCommand
             return;
         }
 
+        if (_config.Votemap.MinPlayers > 0)
+        {
+            int playerCount = _core.PlayerManager.GetAllPlayers().Count(p => p.IsValid && !p.IsFakeClient);
+            if (playerCount < _config.Votemap.MinPlayers)
+            {
+                var localizer = _core.Translation.GetPlayerLocalizer(player);
+                player.SendChat(localizer["map_chooser.prefix"] + " " + localizer["map_chooser.general.validation.min_players", _config.Votemap.MinPlayers]);
+                return;
+            }
+        }
+
         string? mapName = context.Args.Length > 0 ? context.Args[0] : null;
 
         if (string.IsNullOrEmpty(mapName))

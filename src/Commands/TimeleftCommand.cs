@@ -69,7 +69,8 @@ public class TimeleftCommand
         }
         else if (maxrounds > 0)
         {
-            int roundsRemaining = maxrounds - _state.RoundsPlayed;
+            int totalRoundsPlayed = _core.Game.MatchData.TerroristScoreTotal + _core.Game.MatchData.CTScoreTotal;
+            int roundsRemaining = maxrounds - totalRoundsPlayed;
             if (roundsRemaining > 1)
             {
                 text = localizer["map_chooser.timeleft.remaining_rounds", roundsRemaining];

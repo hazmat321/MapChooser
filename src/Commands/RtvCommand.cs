@@ -37,7 +37,27 @@ public class RtvCommand
             player.SendChat(localizer["map_chooser.prefix"] + " " + localizer["map_chooser.general.validation.warmup"]);
             return;
         }
-        
+
+        if (_config.Rtv.MinPlayers > 0)
+        {
+            int playerCount = _core.PlayerManager.GetAllPlayers().Count(p => p.IsValid && !p.IsFakeClient);
+            if (playerCount < _config.Rtv.MinPlayers)
+            {
+                player.SendChat(localizer["map_chooser.prefix"] + " " + localizer["map_chooser.general.validation.min_players", _config.Rtv.MinPlayers]);
+                return;
+            }
+        }
+
+        if (_config.Rtv.MinRounds > 0)
+        {
+            int totalRoundsPlayed = _core.Game.MatchData.TerroristScoreTotal + _core.Game.MatchData.CTScoreTotal;
+            if (totalRoundsPlayed < _config.Rtv.MinRounds)
+            {
+                player.SendChat(localizer["map_chooser.prefix"] + " " + localizer["map_chooser.general.validation.min_rounds", _config.Rtv.MinRounds - totalRoundsPlayed]);
+                return;
+            }
+        }
+
         if (!_config.AllowSpectatorsToVote && player.Controller?.TeamNum == 1)
         {
             player.SendChat(localizer["map_chooser.prefix"] + " " + localizer["map_chooser.general.validation.spectator"]);

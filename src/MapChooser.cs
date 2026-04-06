@@ -13,7 +13,7 @@ using SwiftlyS2.Shared.SchemaDefinitions;
 
 namespace MapChooser;
 
-[PluginMetadata(Id = "MapChooser", Version = "1.0.5", Name = "Map Chooser", Author = "aga", Description = "Map chooser plugin for SwiftlyS2")]
+[PluginMetadata(Id = "MapChooser", Version = "1.0.6", Name = "Map Chooser", Author = "aga", Description = "Map chooser plugin for SwiftlyS2")]
 public sealed class MapChooser : BasePlugin {
     private MapChooserConfig _config = new();
     private MapsConfig _mapsConfig = new();
@@ -205,6 +205,9 @@ public sealed class MapChooser : BasePlugin {
 
     private HookResult OnWinPanelMatch(EventCsWinPanelMatch @event)
     {
+        // EventCsWinPanelMatch also fires at halftime — ignore it then.
+        if (Core.Game.MatchData.Phase == GamePhase.GAMEPHASE_HALFTIME) return HookResult.Continue;
+
         _state.MatchEnded = true;
         if (_state.EofVoteHappening)
         {
@@ -234,11 +237,22 @@ public sealed class MapChooser : BasePlugin {
 
     private void CheckAutomatedVote(bool force = false)
     {
-        if (!_config.EndOfMap.Enabled || _state.EofVoteHappening || _state.EofVoteCompleted || _state.MapChangeScheduled || _state.ChangeMapImmediately || _state.WarmupRunning) return;
+        if (!_config.EndOfMap.Enabled || _state.EofVoteHappening || _state.MapChangeScheduled || _state.ChangeMapImmediately || _state.WarmupRunning) return;
 
-        if (!force)
+        // Never start a vote during halftime.
+        if (Core.Game.MatchData.Phase == GamePhase.GAMEPHASE_HALFTIME) return;
+
+        int totalRoundsPlayed = Core.Game.MatchData.TerroristScoreTotal + Core.Game.MatchData.CTScoreTotal;
+
+        // Safety net: if the vote already completed but no next map was decided (e.g. all maps
+        // were on cooldown, or vote result was lost), bypass the completed flag and cooldown
+        // guards so the vote can re-fire now that we're past the trigger threshold.
+        bool pastDueNoMap = _state.EofVoteCompleted && string.IsNullOrEmpty(_state.NextMap);
+
+        if (!force && !pastDueNoMap)
         {
-            if (_state.RoundsPlayed < _state.NextEofVotePossibleRound) return;
+            if (_state.EofVoteCompleted) return;
+            if (totalRoundsPlayed < _state.NextEofVotePossibleRound) return;
             if (Core.Engine != null && Core.Engine.GlobalVars.CurrentTime < _state.NextEofVotePossibleTime) return;
         }
 
@@ -268,11 +282,8 @@ public sealed class MapChooser : BasePlugin {
 
         if (!trigger && maxrounds > 0)
         {
-            // RoundsPlayed resets to 0 at halftime (OnMatchStart), so compare against
-            // the half-length (maxrounds/2) rather than the full match value.
-            int halfLength = maxrounds / 2;
-            int roundsRemainingInHalf = halfLength - _state.RoundsPlayed;
-            if (roundsRemainingInHalf <= _config.EndOfMap.TriggerRoundsBeforeEnd)
+            int roundsRemaining = maxrounds - totalRoundsPlayed;
+            if (roundsRemaining <= _config.EndOfMap.TriggerRoundsBeforeEnd)
             {
                 trigger = true;
             }
@@ -299,7 +310,8 @@ public sealed class MapChooser : BasePlugin {
 
         if (trigger)
         {
-            _state.NextEofVotePossibleRound = _state.RoundsPlayed + 1;
+            _state.EofVoteCompleted = false;
+            _state.NextEofVotePossibleRound = totalRoundsPlayed + 1;
             if (Core.Engine != null)
                 _state.NextEofVotePossibleTime = Core.Engine.GlobalVars.CurrentTime + _config.EndOfMap.VoteDuration + 1;
             _eofManager.StartVote(_config.EndOfMap.VoteDuration, _config.EndOfMap.MapsToShow);

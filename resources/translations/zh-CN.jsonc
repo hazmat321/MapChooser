@@ -36,6 +36,8 @@
   "map_chooser.timeleft.remaining_rounds": "剩余 {0} 回合",
   "map_chooser.general.validation.warmup": "热身期间无法使用该命令。",
   "map_chooser.general.validation.spectator": "旁观者状态下无法投票。",
+  "map_chooser.general.validation.min_players": "服务器玩家人数不足，至少需要 {0} 名玩家。",
+  "map_chooser.general.validation.min_rounds": "请再等待 {0} 回合后再使用此命令。",
   "map_chooser.revote.no_vote_active": "当前没有正在进行的地图投票。",
   "map_chooser.setnextmap.title": "设置下一张地图：",
   "map_chooser.extend_option": "延长当前地图",

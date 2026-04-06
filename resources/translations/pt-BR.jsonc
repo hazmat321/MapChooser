@@ -36,6 +36,8 @@
   "map_chooser.timeleft.remaining_rounds": "{0} round(s) restantes",
   "map_chooser.general.validation.warmup": "Comando desativado durante o aquecimento.",
   "map_chooser.general.validation.spectator": "Você não pode votar enquanto estiver como spectador.",
+  "map_chooser.general.validation.min_players": "Jogadores insuficientes no servidor. Mínimo de {0} jogadores necessário.",
+  "map_chooser.general.validation.min_rounds": "Aguarde mais {0} round(s) antes de usar este comando.",
   "map_chooser.revote.no_vote_active": "Não há votação de mapa ativa no momento.",
   "map_chooser.setnextmap.title": "Definir próximo mapa:",
   "map_chooser.extend_option": "Estender mapa atual",
