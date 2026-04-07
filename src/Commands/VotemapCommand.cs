@@ -123,8 +123,9 @@ public class VotemapCommand
                 .ToList();
             int totalPlayers = allPlayers.Count;
             int needed = voteManager.GetRequiredVotes(totalPlayers);
-            
-            _core.PlayerManager.SendChat(localizer["map_chooser.prefix"] + " " + localizer["map_chooser.votemap.voted", player.Controller?.PlayerName ?? "Unknown", map.Name, voteManager.VoteCount, needed]);
+
+            if (_config.AnnounceVotes)
+                _core.PlayerManager.SendChat(localizer["map_chooser.prefix"] + " " + localizer["map_chooser.votemap.voted", player.Controller?.PlayerName ?? "Unknown", map.Name, voteManager.VoteCount, needed]);
 
             if (voteManager.HasReached(totalPlayers))
             {

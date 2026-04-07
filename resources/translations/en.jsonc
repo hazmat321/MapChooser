@@ -11,6 +11,7 @@
   "map_chooser.vote.started": "The vote has started! Please vote for the next map.",
   "map_chooser.vote.title": "Vote for the next map:",
   "map_chooser.vote.you_voted": "You voted for [green]{0}[default].",
+  "map_chooser.vote.player_voted": "[green]{0}[default] has voted for [green]{1}[default] [darkred]({2})",
   "map_chooser.vote.ended": "Voting ended. Next map will be [green]{0}[default] [darkred]({1} votes).",
   "map_chooser.next_map_announced": "The next map will be [green]{0}[default].",
   "map_chooser.changing_map": "Changing map to [green]{0}[default] in {1} seconds...",

@@ -71,6 +71,7 @@ public class MapChooserConfig
     public int MapsInCooldown { get; set; } = 3;
     public CommandsConfig Commands { get; set; } = new();
     public bool AllowSpectatorsToVote { get; set; } = false;
+    public bool AnnounceVotes { get; set; } = true;
     public string SetNextMapPermission { get; set; } = "admin.changemap";
     public string MapsVotePermission { get; set; } = "admin.mapsvote";
     public string ChangeMapPermission { get; set; } = "admin.changemap";

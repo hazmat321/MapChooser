@@ -104,7 +104,8 @@ public class RtvCommand
             int totalPlayers = allPlayers.Count;
             int needed = _voteManager.GetRequiredVotes(totalPlayers, _config.Rtv.VotePercentage);
             
-            _core.PlayerManager.SendChat(localizer["map_chooser.prefix"] + " " + localizer["map_chooser.rtv.voted", player.Controller?.PlayerName ?? "Unknown", _voteManager.VoteCount, needed]);
+            if (_config.AnnounceVotes)
+                _core.PlayerManager.SendChat(localizer["map_chooser.prefix"] + " " + localizer["map_chooser.rtv.voted", player.Controller?.PlayerName ?? "Unknown", _voteManager.VoteCount, needed]);
 
             if (_voteManager.HasReached(totalPlayers, _config.Rtv.VotePercentage))
             {
