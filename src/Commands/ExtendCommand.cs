@@ -32,6 +32,32 @@ public class ExtendCommand
         var player = context.Sender!;
         var localizer = _core.Translation.GetPlayerLocalizer(player);
 
+        if (_state.WarmupRunning && !_config.ExtendMap.EnabledInWarmup)
+        {
+            player.SendChat(localizer["map_chooser.prefix"] + " " + localizer["map_chooser.general.validation.warmup"]);
+            return;
+        }
+
+        if (_config.ExtendMap.MinPlayers > 0)
+        {
+            int playerCount = _core.PlayerManager.GetAllPlayers().Count(p => p.IsValid && !p.IsFakeClient);
+            if (playerCount < _config.ExtendMap.MinPlayers)
+            {
+                player.SendChat(localizer["map_chooser.prefix"] + " " + localizer["map_chooser.general.validation.min_players", _config.ExtendMap.MinPlayers]);
+                return;
+            }
+        }
+
+        if (_config.ExtendMap.MinRounds > 0)
+        {
+            int totalRoundsPlayed = _core.Game.MatchData.TerroristScoreTotal + _core.Game.MatchData.CTScoreTotal;
+            if (totalRoundsPlayed < _config.ExtendMap.MinRounds)
+            {
+                player.SendChat(localizer["map_chooser.prefix"] + " " + localizer["map_chooser.general.validation.min_rounds", _config.ExtendMap.MinRounds - totalRoundsPlayed]);
+                return;
+            }
+        }
+
         if (_state.ExtendsLeft <= 0)
         {
             player.SendChat(localizer["map_chooser.prefix"] + " " + localizer["map_chooser.extend.no_extends_left"]);
