@@ -20,17 +20,17 @@ MapChooser is a map voting plugin for SwiftlyS2. It handles Rock The Vote (RTV),
 | Command | Description |
 | :--- | :--- |
 | `!rtv` | Votes to trigger a map vote immediately (Rock The Vote). |
-| `!nominate [map]` | Nominates a map to be included in the next map vote. |
+| `!nominate [map]` / `!nom` | Nominates a map to be included in the next map vote. |
 | `!timeleft` | Shows the remaining time or rounds left on the current map. |
 | `!nextmap` | Shows which map will be played next (if decided). |
 | `!votemap [map]` | Directly votes for a specific map to change to. |
 | `!revote` | Reopens the map vote menu if a vote is currently active. |
-| `!extend` | Votes to extend the current map. |
+| `!ext` / `!extendmap` | Votes to extend the current map. |
 | `!maplist` / `!maps` | Prints the full configured map list to the console. |
 | `!unrtv` | Removes your current RTV vote. |
 | `!setnextmap [map]` | Sets the next map directly or opens a selection menu (Admin only). |
 | `!mapsvote` | Opens a menu to select multiple maps and start a custom vote (Admin only). |
-| `!map` | Loads requested map (Admin only). |
+| `!map` / `!setmap` | Loads requested map (Admin only). |
 
 ## Configuration (`config.jsonc`)
 
@@ -38,11 +38,12 @@ MapChooser is a map voting plugin for SwiftlyS2. It handles Rock The Vote (RTV),
 | Setting | Default | Description |
 | :--- | :--- | :--- |
 | `Enabled` | `true` | Enable or disable the Rock The Vote system. |
-| `EnabledInWarmup` | `true` | Allow players to RTV during warmup. |
+| `EnabledInWarmup` | `false` | Allow players to RTV during warmup. |
 | `NominationEnabled` | `true` | Allow players to nominate maps for the vote. |
 | `MinPlayers` | `0` | Minimum number of players required to enable RTV. |
 | `MinRounds` | `0` | Minimum rounds that must be played before RTV is allowed. |
-| `ChangeMapImmediately` | `true` | Change the map immediately after a successful RTV vote (3s delay). |
+| `ChangeMapImmediately` | `true` | Change the map immediately after a successful RTV vote. |
+| `ChangeMapDelay` | `3` | Delay in seconds before changing the map after a successful RTV vote. |
 | `MapsToShow` | `6` | Number of maps to display in the RTV vote menu. |
 | `VoteDuration` | `30` | How long the vote menu remains open (seconds). |
 | `VotePercentage` | `60` | Percentage of players required to trigger the vote. |
@@ -53,7 +54,7 @@ MapChooser is a map voting plugin for SwiftlyS2. It handles Rock The Vote (RTV),
 | :--- | :--- | :--- |
 | `Enabled` | `true` | Enable or disable the manual `!votemap` command. |
 | `VotePercentage` | `60` | Percentage of players required to reach the vote threshold. |
-| `ChangeMapImmediately` | `true` | Change map immediately once the threshold is reached. |
+| `ChangeMapImmediately` | `false` | Change map immediately once the threshold is reached. |
 | `MinPlayers` | `0` | Minimum players required to use `!votemap`. |
 
 ### End Of Map Settings (`EndOfMap`)
@@ -62,8 +63,9 @@ MapChooser is a map voting plugin for SwiftlyS2. It handles Rock The Vote (RTV),
 | `Enabled` | `true` | Enable or disable the automated vote at the end of the map. |
 | `MapsToShow` | `6` | Number of maps to show in the automated vote. |
 | `VoteDuration` | `30` | Duration of the automated vote menu. |
+| `ChangeMapDelay` | `5` | Delay in seconds before changing the map after the vote ends. |
 | `TriggerSecondsBeforeEnd` | `120` | Seconds before timelimit to trigger the vote. |
-| `TriggerRoundsBeforeEnd` | `2` | Rounds (or score difference from winning) before map end to trigger the vote. |
+| `TriggerRoundsBeforeEnd` | `4` | Rounds (or score difference from winning) before map end to trigger the vote. |
 | `AllowExtend` | `true` | Allow extending the map from the end-of-map vote menu. |
 | `ExtendTimeStep` | `15` | Minutes to add when extending by time. |
 | `ExtendRoundStep` | `5` | Rounds to add when extending by rounds. |
@@ -83,9 +85,30 @@ MapChooser is a map voting plugin for SwiftlyS2. It handles Rock The Vote (RTV),
 | :--- | :--- | :--- |
 | `MapsInCooldown` | `3` | Number of recently played maps to exclude from the next vote. |
 | `AllowSpectatorsToVote` | `false` | Allow spectators to participate in votes. |
+| `AnnounceVotes` | `true` | Broadcast vote counts to all players during voting. |
 | `SetNextMapPermission` | `admin.changemap` | Permission flag required for the `!setnextmap` command. |
 | `MapsVotePermission` | `admin.mapsvote` | Permission flag required for the `!mapsvote` command. |
+| `ChangeMapPermission` | `admin.changemap` | Permission flag required for the `!map` / `!setmap` command. |
 | `Maps` | (List) | List of maps available. Use `ws:ID` for workshop maps. |
+
+### Commands Settings (`Commands`)
+
+All command aliases are fully configurable. Each setting accepts a comma-separated list of aliases.
+
+| Setting | Default | Description |
+| :--- | :--- | :--- |
+| `Rtv` | `rtv` | Aliases for the Rock The Vote command. |
+| `UnRtv` | `unrtv` | Aliases for the undo RTV command. |
+| `Nominate` | `nominate,nom,yd` | Aliases for the nominate command. |
+| `Timeleft` | `timeleft` | Aliases for the timeleft command. |
+| `Nextmap` | `nextmap` | Aliases for the nextmap command. |
+| `Votemap` | `votemap` | Aliases for the votemap command. |
+| `Revote` | `revote` | Aliases for the revote command. |
+| `SetNextMap` | `setnextmap` | Aliases for the set next map command. |
+| `Extend` | `ext,extendmap` | Aliases for the extend map command. |
+| `MapsVote` | `mapsvote` | Aliases for the admin maps vote command. |
+| `ChangeMap` | `map,setmap` | Aliases for the admin change map command. |
+| `MapList` | `maplist,maps` | Aliases for the map list command. |
 
 ### Map Configuration
 
@@ -132,7 +155,7 @@ Each map entry supports the following properties:
 }
 ```
 
-In this example, when there are 1–3 real players on the server, only `aim_redline_snow` and `AWP LEGO` will appear in votes and nominations. Once there are 4+ players, only `Dust II` and `Inferno Night` will be available.
+In this example, when there are 1–3 real players on the server, only `Mirage` and `Overpass` will appear in votes and nominations. Once there are 4+ players, only `Dust II` and `Inferno Night` will be available.
 
 ## Features
 
