@@ -1,6 +1,6 @@
 {
   "map_chooser.prefix": "[ [darkred]MapChooser [default]]",
-  "map_chooser.rtv.voted": "[green]{0}[default] balsavo už žemėlapio pakeitimą. ([red]{1}[default]/[green]{2}[default])",
+  "map_chooser.rtv.voted": "[green]{0}[default] balsavo už žemėlapio pakeitimą. ([darkred]{1}[default]/[green]{2}[default])",
   "map_chooser.rtv.already_voted": "Tu jau balsavai už žemėlapio pakeitimą.",
   "map_chooser.rtv.vote_removed": "Pašalinai savo balsą už žemėlapio pakeitimą.",
   "map_chooser.rtv.vote_cancelled": "Balsavimas už žemėlapio pakeitimą atšauktas.",
@@ -19,7 +19,7 @@
   "map_chooser.nominate.not_found": "Žemėlapis [darkred]{0}[default] nerastas.",
   "map_chooser.nominate.current_map": "Negali nominuoti dabartinio žemėlapio.",
   "map_chooser.votemap.cooldown": "Žemėlapis [darkred]{0}[default] yra cooldowne.",
-  "map_chooser.votemap.voted": "[green]{0}[default] balsavo už [green]{1}[default]. ([red]{2}[default]/[green]{3}[default])",
+  "map_chooser.votemap.voted": "[green]{0}[default] balsavo už [green]{1}[default]. ([darkred]{2}[default]/[green]{3}[default])",
   "map_chooser.votemap.already_voted": "Tu jau balsavai už [green]{0}[default].",
   "map_chooser.next_map_not_decided": "Kitas žemėlapis dar nenuspręstas.",
   "map_chooser.next_map_decided": "Kitas žemėlapis yra [green]{0}[default].",
