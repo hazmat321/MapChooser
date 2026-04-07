@@ -1,6 +1,6 @@
 {
   "map_chooser.prefix": "[ [darkred]MapChooser [default]]",
-  "map_chooser.rtv.voted": "[green]{0}[default] has voted to change the map. [darkred]({1}/{2} votes needed)",
+  "map_chooser.rtv.voted": "[green]{0}[default] has voted to change the map. ([red]{1}[default]/[green]{2}[default])",
   "map_chooser.rtv.already_voted": "You have already voted to change the map.",
   "map_chooser.rtv.vote_removed": "You have removed your vote to change the map.",
   "map_chooser.rtv.vote_cancelled": "The vote to change the map has been cancelled.",
@@ -19,7 +19,7 @@
   "map_chooser.nominate.not_found": "Map [darkred]{0}[default] not found.",
   "map_chooser.nominate.current_map": "You cannot nominate the current map.",
   "map_chooser.votemap.cooldown": "Map [darkred]{0}[default] is in cooldown.",
-  "map_chooser.votemap.voted": "[green]{0}[default] has voted for [green]{1}[default]. [darkred]({2}/{3} votes needed)",
+  "map_chooser.votemap.voted": "[green]{0}[default] has voted for [green]{1}[default]. ([red]{1}[default]/[green]{2}[default])",
   "map_chooser.votemap.already_voted": "You have already voted for [green]{0}[default].",
   "map_chooser.next_map_not_decided": "The next map has not been decided yet.",
   "map_chooser.next_map_decided": "The next map is [green]{0}[default].",
@@ -43,7 +43,7 @@
   "map_chooser.setnextmap.title": "Set Next Map:",
   "map_chooser.extend_option": "Extend Current Map",
   "map_chooser.extend.no_extends_left": "The map has reached its maximum number of extensions.",
-  "map_chooser.extend.voted": "[green]{0}[default] has voted to extend the current map. [darkred]({1}/{2} votes needed)",
+  "map_chooser.extend.voted": "[green]{0}[default] has voted to extend the current map. ([red]{1}[default]/[green]{2}[default])",
   "map_chooser.extend.already_voted": "You have already voted to extend the current map.",
   "map_chooser.extend.vote_passed": "Voting ended. The current map will be [green]extended[default]. [darkred]({0} votes)",
   "map_chooser.vote.map_extended_time": "Current map extended by [green]{0}[default] minutes. [darkred]({1} extends left)",
@@ -54,9 +54,9 @@
   "map_chooser.general.validation.player_count": "Map [darkred]{0}[default] is not available for the current number of players.",
   "map_chooser.maplist.check_console": "Map list has been printed to your console.",
   "map_chooser.maplist.empty": "There are no maps configured.",
-  "map_chooser.maplist.header": "--------- MAP LIST ({0} maps) ---------",
+  "map_chooser.maplist.header": "▬▬▬▬ MAP LIST ({0} maps) ▬▬▬▬",
   "map_chooser.maplist.entry": "{0}. {1} [{2}]",
   "map_chooser.maplist.status_available": "Available",
   "map_chooser.maplist.status_cooldown": "Cooldown",
-  "map_chooser.maplist.footer": "--------- END MAP LIST ---------"
+  "map_chooser.maplist.footer": "▬▬▬▬ END MAP LIST ▬▬▬▬"
 }
