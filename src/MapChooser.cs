@@ -13,7 +13,7 @@ using SwiftlyS2.Shared.SchemaDefinitions;
 
 namespace MapChooser;
 
-[PluginMetadata(Id = "MapChooser", Version = "1.0.8", Name = "Map Chooser", Author = "aga", Description = "Map chooser plugin for SwiftlyS2")]
+[PluginMetadata(Id = "MapChooser", Version = "1.1.0", Name = "Map Chooser", Author = "aga", Description = "Map chooser plugin for SwiftlyS2")]
 public sealed class MapChooser : BasePlugin {
     private MapChooserConfig _config = new();
     private MapsConfig _mapsConfig = new();
@@ -108,6 +108,7 @@ public sealed class MapChooser : BasePlugin {
         Core.GameEvent.HookPost<EventRoundAnnounceWarmup>(OnAnnounceWarmup);
         Core.GameEvent.HookPost<EventWarmupEnd>(OnWarmupEnd);
         Core.GameEvent.HookPost<EventCsWinPanelMatch>(OnWinPanelMatch);
+        Core.GameEvent.HookPost<EventGamePhaseChanged>(OnGamePhaseChanged);
         Core.GameEvent.HookPost<EventRoundAnnounceMatchStart>(OnMatchStart);
         Core.GameEvent.HookPost<EventRoundAnnounceMatchPoint>(OnMatchPoint);
         Core.Event.OnMapLoad += OnMapLoad;
@@ -120,6 +121,8 @@ public sealed class MapChooser : BasePlugin {
 
     private void OnMapLoad(IOnMapLoadEvent @event)
     {
+        if (string.IsNullOrEmpty(@event.MapName)) return;
+
         _eofManager?.ResetVote();
         _state.MapChangeScheduled = false;
         _state.EofVoteHappening = false;
@@ -149,8 +152,6 @@ public sealed class MapChooser : BasePlugin {
 
     private HookResult OnRoundStart(EventRoundStart @event)
     {
-        var warmupConVar = Core.ConVar.Find<int>("mp_warmup_period");
-        _state.WarmupRunning = warmupConVar?.Value == 1;
         CheckAutomatedVote();
         return HookResult.Continue;
     }
@@ -215,6 +216,19 @@ public sealed class MapChooser : BasePlugin {
         return HookResult.Continue;
     }
 
+    private HookResult OnGamePhaseChanged(EventGamePhaseChanged @event)
+    {
+        if (@event.NewPhase != (short)GamePhase.GAMEPHASE_MATCH_ENDED) return HookResult.Continue;
+        if (_state.MatchEnded) return HookResult.Continue;
+
+        _state.MatchEnded = true;
+        if (_state.EofVoteHappening)
+            _eofManager.ForceEnd();
+        else if (_state.MapChangeScheduled)
+            _changeMapManager.ChangeMap();
+        return HookResult.Continue;
+    }
+
     private HookResult OnRoundEnd(EventRoundEnd @event)
     {
         _state.RoundsPlayed++;
@@ -222,7 +236,7 @@ public sealed class MapChooser : BasePlugin {
         {
             _changeMapManager.ChangeMap();
         }
-        else if (!_state.MapChangeScheduled && !_state.ChangeMapImmediately)
+        else if (!_state.MapChangeScheduled)
         {
             CheckAutomatedVote();
         }
@@ -232,7 +246,7 @@ public sealed class MapChooser : BasePlugin {
 
     private void CheckAutomatedVote(bool force = false)
     {
-        if (!_config.EndOfMap.Enabled || _state.EofVoteHappening || _state.MapChangeScheduled || _state.ChangeMapImmediately || _state.WarmupRunning) return;
+        if (!_config.EndOfMap.Enabled || _state.EofVoteHappening || _state.MapChangeScheduled || _state.WarmupRunning) return;
 
         if (Core.Game.MatchData.Phase == GamePhase.GAMEPHASE_HALFTIME) return;
 

@@ -228,6 +228,7 @@ public class EndOfMapVoteManager
             return;
         }
 
+        RefreshVoteMenu();
         _core.Scheduler.DelayBySeconds(1, () => RunVoteTimer(sessionId));
     }
 
@@ -326,12 +327,15 @@ public class EndOfMapVoteManager
 
         var localizer = _core.Translation.GetPlayerLocalizer(player);
         string displayName = map == "map_chooser.extend_option" ? localizer["map_chooser.extend_option"] : map;
-        player.SendChat(localizer["map_chooser.prefix"] + " " + localizer["map_chooser.vote.you_voted", displayName]);
 
         if (_config.AnnounceVotes)
         {
             int mapVoteCount = _votes.GetValueOrDefault(map, 0);
             _core.PlayerManager.SendChat(_core.Localizer["map_chooser.prefix"] + " " + _core.Localizer["map_chooser.vote.player_voted", player.Controller?.PlayerName ?? "Unknown", displayName, mapVoteCount]);
+        }
+        else
+        {
+            player.SendChat(localizer["map_chooser.prefix"] + " " + localizer["map_chooser.vote.you_voted", displayName]);
         }
         
         var currentMenu = _core.MenusAPI.GetCurrentMenu(player);
