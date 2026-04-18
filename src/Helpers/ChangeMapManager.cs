@@ -41,10 +41,12 @@ public class ChangeMapManager
     {
         if (string.IsNullOrEmpty(_state.NextMap)) return;
 
+        var mapName = _state.NextMap;
+        _state.NextMap = null;
         _state.MapChangeScheduled = false;
         _state.ChangeMapImmediately = true;
 
-        var map = _mapLister.Maps.FirstOrDefault(m => m.Name.Equals(_state.NextMap, StringComparison.OrdinalIgnoreCase));
+        var map = _mapLister.Maps.FirstOrDefault(m => m.Name.Equals(mapName, StringComparison.OrdinalIgnoreCase));
         if (map == null) return;
 
         int delay = _state.IsRtv ? _config.Rtv.ChangeMapDelay : _config.EndOfMap.ChangeMapDelay;
