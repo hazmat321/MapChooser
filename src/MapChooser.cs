@@ -9,6 +9,7 @@ using SwiftlyS2.Shared.Events;
 using SwiftlyS2.Shared.GameEventDefinitions;
 using SwiftlyS2.Shared.Misc;
 using SwiftlyS2.Shared.Plugins;
+using SwiftlyS2.Shared.Natives;
 using SwiftlyS2.Shared.SchemaDefinitions;
 
 namespace MapChooser;
@@ -206,7 +207,17 @@ public sealed class MapChooser : BasePlugin {
 
     private HookResult OnWinPanelMatch(EventCsWinPanelMatch @event)
     {
-        if (Core.Game.MatchData.Phase == GamePhase.GAMEPHASE_HALFTIME) return HookResult.Continue;
+        CCSMatch match;
+        try
+        {
+            match = Core.Game.MatchData;
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("GameRules not found", StringComparison.OrdinalIgnoreCase))
+        {
+            return HookResult.Continue;
+        }
+
+        if (match.Phase == GamePhase.GAMEPHASE_HALFTIME) return HookResult.Continue;
 
         _state.MatchEnded = true;
         if (_state.EofVoteHappening)
@@ -248,9 +259,19 @@ public sealed class MapChooser : BasePlugin {
     {
         if (!_config.EndOfMap.Enabled || _state.EofVoteHappening || _state.MapChangeScheduled || _state.WarmupRunning) return;
 
-        if (Core.Game.MatchData.Phase == GamePhase.GAMEPHASE_HALFTIME) return;
+        CCSMatch match;
+        try
+        {
+            match = Core.Game.MatchData;
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("GameRules not found", StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
 
-        int totalRoundsPlayed = Core.Game.MatchData.TerroristScoreTotal + Core.Game.MatchData.CTScoreTotal;
+        if (match.Phase == GamePhase.GAMEPHASE_HALFTIME) return;
+
+        int totalRoundsPlayed = match.TerroristScoreTotal + match.CTScoreTotal;
 
         bool pastDueNoMap = _state.EofVoteCompleted && string.IsNullOrEmpty(_state.NextMap);
 
