@@ -1,7 +1,6 @@
 using MapChooser.Models;
 using MapChooser.Dependencies;
 using SwiftlyS2.Shared;
-using SwiftlyS2.Shared.Natives;
 
 namespace MapChooser.Helpers;
 
@@ -54,18 +53,7 @@ public class ExtendManager
 
         _state.MapChangeScheduled = false;
         _state.EofVoteCompleted = false;
-
-        CCSMatch match;
-        try
-        {
-            match = _core.Game.MatchData;
-        }
-        catch (InvalidOperationException ex) when (ex.Message.Contains("GameRules not found", StringComparison.OrdinalIgnoreCase))
-        {
-            return;
-        }
-
-        _state.NextEofVotePossibleRound = match.TerroristScoreTotal + match.CTScoreTotal + 1;
+        _state.NextEofVotePossibleRound = _core.Game.MatchData.TerroristScoreTotal + _core.Game.MatchData.CTScoreTotal + 1;
         if (_core.Engine?.GlobalVars != null)
             _state.NextEofVotePossibleTime = _core.Engine.GlobalVars.CurrentTime + 60.0f;
 
