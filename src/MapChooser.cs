@@ -8,6 +8,7 @@ using SwiftlyS2.Shared.Commands;
 using SwiftlyS2.Shared.Events;
 using SwiftlyS2.Shared.GameEventDefinitions;
 using SwiftlyS2.Shared.Misc;
+using SwiftlyS2.Shared.Natives;
 using SwiftlyS2.Shared.Plugins;
 using SwiftlyS2.Shared.SchemaDefinitions;
 
@@ -248,9 +249,12 @@ public sealed class MapChooser : BasePlugin {
     {
         if (!_config.EndOfMap.Enabled || _state.EofVoteHappening || _state.MapChangeScheduled || _state.WarmupRunning) return;
 
-        if (Core.Game.MatchData.Phase == GamePhase.GAMEPHASE_HALFTIME) return;
+        if (Core.EntitySystem.GetGameRules()?.IsValid != true) return;
 
-        int totalRoundsPlayed = Core.Game.MatchData.TerroristScoreTotal + Core.Game.MatchData.CTScoreTotal;
+        CCSMatch match = Core.Game.MatchData;
+        if (match.Phase == GamePhase.GAMEPHASE_HALFTIME) return;
+
+        int totalRoundsPlayed = match.TerroristScoreTotal + match.CTScoreTotal;
 
         bool pastDueNoMap = _state.EofVoteCompleted && string.IsNullOrEmpty(_state.NextMap);
 
